@@ -5,14 +5,14 @@ import re
 import socket
 
 
-class cli():
+class CLI():
     buffer: str
     sck: socket.socket
     charset: str
 
-    def __init__(self, buffer=str(), sck=socket.socket(socket.AF_INET, socket.SOCK_STREAM), charset="utf-8"):
-        self.buffer = buffer
-        self.sck = sck
+    def __init__(self, charset="utf-8"):
+        self.buffer = str()
+        self.sck = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.charset = charset
 
     def __del__(self):
@@ -24,8 +24,16 @@ class cli():
     def connect(self, address: str, port: int):
         self.sck.connect((address, port))
 
-    def reconnect(self, address: str, port: int):
-        self.sck.close()
+    def reconnect(self, address: str, port: int, resetBuffer=True):
+        if resetBuffer:
+            self.buffer = str()
+
+        try:
+            self.sck.close()
+        except Exception:
+            pass
+
+        self.sck = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sck.connect((address, port))
 
     def recvline(self, lineCount=1):
@@ -47,7 +55,10 @@ class cli():
             lines.append(self.buffer[0:index])
             self.buffer = self.buffer[index + 1:]
 
-        return lines
+        if lineCount == 1:
+            return lines[0]
+        else:
+            return lines
 
     def recvUntilHave(self, target: str):
         '''
@@ -91,13 +102,18 @@ class cli():
 
         return data.split('\n')
 
-    def recvUntilMatch(self, regEx: str):
+    def recvUntilFind(self, regEx: str, onlyRuturnRegEx=False):
         '''
-        Receive data until match the regEx.
+        Receive data until regEx can be found.
 
-        Example: recvUntilHave("flag{.+}") \n
+        Example: recvUntilHave("flag\\\{.+\\\}") \n
         Received "zxc\\nvbbnmflag{2333}can'tseeme\\nsomethingelse" from remote. \n
-        Will return "zxc\\nvbbnmflag{2333}" and keeping "can'tseeme\\nsomethingelse" in buffer.
+        Will return "zxc\\nvbbnmflag{2333}" and keeping "can'tseeme\\nsomethingelse" in buffer. \n
+        If onlyRuturnRegEx == True, will only return "flag{2333}" and keeping "can'tseeme\\nsomethingelse" in buffer. \n
+        Additional, if have group, like '(' and ')' in regEx , it will return all groups. \n
+        Example: recvUntilHave("test([0-4]{1,})([5-9]{1,})abc) \n
+        Received "test123456789abcdefg" from remote. \n
+        Will return list(["1234","56789"]) and keeping "abcdefg" in buffer. \n
         '''
 
         reg = re.compile(regEx)
@@ -106,19 +122,28 @@ class cli():
             try:
                 iter = reg.finditer(self.buffer)
                 result = iter.__next__()
-                data = self.buffer[0:result.end()]
-                self.buffer = self.buffer[result.end():]
+
+                if len(result.regs) == 1:
+                    if onlyRuturnRegEx:
+                        data = self.buffer[result.start():result.end()]
+                    else:
+                        data = self.buffer[0:result.end()]
+                    self.buffer = self.buffer[result.end():]
+                else:
+                    data = list(result.groups())
+                    # result.regs[-1][1] is the index of last char in groups.
+                    self.buffer = self.buffer[result.regs[-1][1]:]
                 break
             except StopIteration:
                 self.buffer += self.sck.recv(2048).decode(self.charset)
 
         return data
 
-    def recvLinesUntilMatch(self, regEx: str):
+    def recvLinesUntilFind(self, regEx: str):
         '''
-        Receive lines until match the regEx.
+        Receive lines until regEx can be found.
 
-        Example: recvUntilHave("flag{.+}") \n
+        Example: recvUntilHave("flag\\\{.+\\\}") \n
         Received "zxc\\nvbbnmflag{2333}can'tseeme\\nsomethingelse" from remote. \n
         Will return list(["zxc", "vbbnmflag{2333}can'tseeme"]) and keeping "somethingelse" in buffer.
         '''
