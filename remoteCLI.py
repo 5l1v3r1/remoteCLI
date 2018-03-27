@@ -40,9 +40,9 @@ class CLI():
         '''
         Receive lines.
 
-        Example: recvline(3) \n
-        Received "123\\n456\\n789\\n!@#" from remote. \n
-        Will return list(["123","456","789"]) and keeping "!@#" in buffer.
+        Example: `recvline(3)`   
+        If received `"123\\n456\\n789\\n!@#"` from remote.  
+        Will return `list(["123","456","789"])` and keeping `"!@#"` in buffer.
         '''
 
         lines = list()
@@ -64,9 +64,9 @@ class CLI():
         '''
         Receive data until contain target in it.
 
-        Example: recvUntilHave("flag") \n
-        Received "zxc\\nvbbnmflagqwe" from remote. \n
-        Will return "zxc\\nvbbnmflag" and keeping "qwe" in buffer.
+        Example: `recvUntilHave("flag")`  
+        If received `"zxc\\nvbbnmflagqwe"` from remote.  
+        Will return `"zxc\\nvbbnmflag"` and keeping `"qwe"` in buffer.
         '''
 
         index = self.buffer.find(target)
@@ -82,9 +82,9 @@ class CLI():
         '''
         Receive lines until contain target in it.
 
-        Example: recvUntilHave("flag") \n
-        Received "zxc\\nvbbnmflagqwe\\nsomethingelse\\n233" from remote. \n
-        Will return list(["zxc", "vbbnmflagqwe"]) and keeping "somethingelse\\n233" in buffer.
+        Example: `recvUntilHave("flag")`  
+        If received `"zxc\\nvbbnmflagqwe\\nsomethingelse\\n233"` from remote.  
+        Will return `list(["zxc", "vbbnmflagqwe"])` and keeping `"somethingelse\\n233"` in buffer.
         '''
 
         targetIndex = self.buffer.find(target)
@@ -102,18 +102,20 @@ class CLI():
 
         return data.split('\n')
 
-    def recvUntilFind(self, regEx: str, onlyRuturnRegEx=False):
+    def recvUntilFind(self, regEx: str, onlyReturnRegEx=False):
         '''
         Receive data until regEx can be found.
 
-        Example: recvUntilHave("flag\\\{.+\\\}") \n
-        Received "zxc\\nvbbnmflag{2333}can'tseeme\\nsomethingelse" from remote. \n
-        Will return "zxc\\nvbbnmflag{2333}" and keeping "can'tseeme\\nsomethingelse" in buffer. \n
-        If onlyRuturnRegEx == True, will only return "flag{2333}" and keeping "can'tseeme\\nsomethingelse" in buffer. \n
-        Additional, if have group, like '(' and ')' in regEx , it will return all groups. \n
-        Example: recvUntilHave("test([0-4]{1,})([5-9]{1,})abc) \n
-        Received "test123456789abcdefg" from remote. \n
-        Will return list(["1234","56789"]) and keeping "abcdefg" in buffer. \n
+        Example: `recvUntilHave("flag\\{.+\\}")`   
+        If received `"zxc\\nvbbnmflag{2333}can'tseeme\\nsomethingelse"` from remote.           
+        Will return `"zxc\\nvbbnmflag{2333}"` and keeping `"can'tseeme\\nsomethingelse"` in buffer. 
+          
+        If `onlyReturnRegEx == True`, will only return `"flag{2333}"` and keeping `"can'tseeme\\nsomethingelse"` in buffer. 
+           
+        Additional, if have group, like `'('` and `')'` in regEx , it will return all groups.        
+        Example: `recvUntilHave("test([0-4]{1,})([5-9]{1,})abc)`  
+        Received `"test123456789abcdefg"` from remote.  
+        Will return `list(["1234","56789"])` and keeping `"abcdefg"` in buffer.  
         '''
 
         reg = re.compile(regEx)
@@ -124,7 +126,7 @@ class CLI():
                 result = iter.__next__()
 
                 if len(result.regs) == 1:
-                    if onlyRuturnRegEx:
+                    if onlyReturnRegEx:
                         data = self.buffer[result.start():result.end()]
                     else:
                         data = self.buffer[0:result.end()]
@@ -143,9 +145,9 @@ class CLI():
         '''
         Receive lines until regEx can be found.
 
-        Example: recvUntilHave("flag\\\{.+\\\}") \n
-        Received "zxc\\nvbbnmflag{2333}can'tseeme\\nsomethingelse" from remote. \n
-        Will return list(["zxc", "vbbnmflag{2333}can'tseeme"]) and keeping "somethingelse" in buffer.
+        Example: `recvUntilHave("flag\\{.+\\}")`  
+        Received `"zxc\\nvbbnmflag{2333}can'tseeme\\nsomethingelse"` from remote.  
+        Will return `list(["zxc", "vbbnmflag{2333}can'tseeme"])` and keeping `"somethingelse"` in buffer.
         '''
 
         reg = re.compile(regEx)
