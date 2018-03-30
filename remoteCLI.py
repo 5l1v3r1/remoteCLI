@@ -195,7 +195,8 @@ class CLI():
                 print(self.sck.recv(2048).decode(), end='')
 
         threading.Thread(target=listen).start()
-
+        print(self.buffer, end='')
+        
         while True:
             data = input()
             self.sendLine(data)
