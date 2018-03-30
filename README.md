@@ -1,12 +1,14 @@
 # Remote CLI
-> 一个对socket简单的封装  
+
+> 一个对socket简单的封装
 
 有时候会碰到通过 nc 来交互的 miscs 或者 crypto 题， 于是就想着做个简单的封装吧  
 省的大佬们手输答案233
 
-## Examples  
+## Examples
 
-#### server
+### server
+
 ```python
 def handle(subsck):
     cli = remoteCLI.CLI()
@@ -42,24 +44,25 @@ while True:
     threading.Thread(target=handle, args=(subsck,)).start()
 ```
 
-#### client
+### client
+
 ```python
 cli = remoteCLI.CLI()
 cli.connect("127.0.0.1", 12345)
 print(cli.recvline())
 
 for i in range(100):
-    paras = cli.recvUntilFind(r"([0-9]{1,}) \+ ([0-9]{1,})")  
+    paras = cli.recvUntilFind(r"([0-9]{1,}) \+ ([0-9]{1,})")
     answer = int(paras[0]) + int(paras[1])
     print(i, paras, answer)
     cli.sendLine(str(answer))
 
-while True:
-    print(cli.recvline())
+cli.console()
 ```
 
-#### output
-> 100 rounds test, are you ready?  
+### output
+
+> 100 rounds test, are you ready?
 0 ['29', '33'] 62  
 1 ['40', '34'] 74  
 ...  

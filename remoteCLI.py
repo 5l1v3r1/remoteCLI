@@ -3,6 +3,7 @@
 
 import re
 import socket
+import threading
 
 
 class CLI():
@@ -109,9 +110,9 @@ class CLI():
         Example: `recvUntilHave("flag\\{.+\\}")`   
         If received `"zxc\\nvbbnmflag{2333}can'tseeme\\nsomethingelse"` from remote.           
         Will return `"zxc\\nvbbnmflag{2333}"` and keeping `"can'tseeme\\nsomethingelse"` in buffer. 
-          
+
         If `onlyReturnRegEx == True`, will only return `"flag{2333}"` and keeping `"can'tseeme\\nsomethingelse"` in buffer. 
-           
+
         Additional, if have group, like `'('` and `')'` in regEx , it will return all groups.        
         Example: `recvUntilHave("test([0-4]{1,})([5-9]{1,})abc)`  
         Received `"test123456789abcdefg"` from remote.  
@@ -184,3 +185,17 @@ class CLI():
             pass
         data = data+'\n'.encode()
         self.sck.sendall(data)
+
+    def console(self):
+        '''
+        Start interacting, just like nc.
+        '''
+        def listen():
+            while True:
+                print(self.sck.recv(2048).decode(), end='')
+
+        threading.Thread(target=listen).start()
+
+        while True:
+            data = input()
+            self.sendLine(data)

@@ -10,5 +10,4 @@ for i in range(100):
     print(i, paras, answer)
     cli.sendLine(str(answer))
 
-while True:
-    print(cli.recvline())
+cli.console()
