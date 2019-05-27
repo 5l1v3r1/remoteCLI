@@ -186,7 +186,7 @@ class CLI():
         data = data+'\n'.encode()
         self.sck.sendall(data)
 
-    def console(self):
+    def interactive(self):
         '''
         Start interacting, just like nc.
         '''
@@ -194,9 +194,17 @@ class CLI():
             while True:
                 print(self.sck.recv(2048).decode(), end='')
 
-        threading.Thread(target=listen).start()
         print(self.buffer, end='')
+        t = threading.Thread(target=listen)
+        t.setDaemon(True)
+        t.start()
+
+        try:
+            while True:
+                data = input()
+                self.sendLine(data)
+        except KeyboardInterrupt:
+            return
         
-        while True:
-            data = input()
-            self.sendLine(data)
+    def console(self):
+        self.interactive()
