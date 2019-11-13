@@ -51,7 +51,7 @@ class CLI():
         while len(lines) < lineCount:
             index = self.buffer.find('\n')
             while index == -1:
-                self.buffer += self.sck.recv(2048).decode(self.charset)
+                self.buffer += self.sck.recv(2048).decode(self.charset, 'ignore')
                 index = self.buffer.find('\n')
             lines.append(self.buffer[0:index])
             self.buffer = self.buffer[index + 1:]
@@ -72,7 +72,7 @@ class CLI():
 
         index = self.buffer.find(target)
         while index == -1:
-            self.buffer += self.sck.recv(2048).decode(self.charset)
+            self.buffer += self.sck.recv(2048).decode(self.charset, 'ignore')
             index = self.buffer.find(target)
         data = self.buffer[0:index + len(target)]
         self.buffer = self.buffer[index + len(target):]
@@ -90,12 +90,12 @@ class CLI():
 
         targetIndex = self.buffer.find(target)
         while targetIndex == -1:
-            self.buffer += self.sck.recv(2048).decode(self.charset)
+            self.buffer += self.sck.recv(2048).decode(self.charset, 'ignore')
             targetIndex = self.buffer.find(target)
 
         index = self.buffer.find('\n', targetIndex)
         while index == -1:
-            self.buffer += self.sck.recv(2048).decode(self.charset)
+            self.buffer += self.sck.recv(2048).decode(self.charset, 'ignore')
             index = self.buffer.find('\n', targetIndex)
 
         data = self.buffer[0:index]
@@ -138,7 +138,7 @@ class CLI():
                     self.buffer = self.buffer[result.regs[-1][1]:]
                 break
             except StopIteration:
-                self.buffer += self.sck.recv(2048).decode(self.charset)
+                self.buffer += self.sck.recv(2048).decode(self.charset, 'ignore')
 
         return data
 
@@ -159,11 +159,11 @@ class CLI():
                 result = iter.__next__()
                 break
             except StopIteration:
-                self.buffer += self.sck.recv(2048).decode(self.charset)
+                self.buffer += self.sck.recv(2048).decode(self.charset, 'ignore')
 
         index = self.buffer.find('\n', result.end())
         while index == -1:
-            self.buffer += self.sck.recv(2048).decode(self.charset)
+            self.buffer += self.sck.recv(2048).decode(self.charset, 'ignore')
             index = self.buffer.find('\n', result.end())
 
         data = self.buffer[0:index]
@@ -192,7 +192,7 @@ class CLI():
         '''
         def listen():
             while True:
-                print(self.sck.recv(2048).decode(), end='')
+                print(self.sck.recv(2048).decode(self.charset, 'ignore'), end='')
 
         print(self.buffer, end='')
         t = threading.Thread(target=listen)
